@@ -12,6 +12,6 @@ vault = Vault("User")
 vault.add_entry(Entry("Google", "user1", "password1"))
 manager.save(vault, "vault.dat")
 loaded = manager.load("vault.dat", "User")
-print("Loaded enteries:")
-for e in loaded.enteries:
+print("Loaded entries:")
+for e in loaded.entries:
     print(e.site, e.username, e.password)
