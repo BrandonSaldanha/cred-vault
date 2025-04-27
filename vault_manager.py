@@ -17,9 +17,9 @@ class VaultManager:
         with open(filepath, 'rb') as file:
             encrypted = file.read()
         decrypted = self.fernet.decrypt(encrypted)
-        entries_data = json.loads(decrypted.decode())
+        enteries_data = json.loads(decrypted.decode())
         vault = Vault(owner)
-        for e in entries_data:
+        for e in enteries_data:
             vault.add_entry(Entry(**e))
         return vault
 
