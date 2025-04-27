@@ -25,10 +25,10 @@ def list_entries():
 @click.command()
 @click.argument('filepath')
 @click.argument('key')
-def save(filepath, key):
+def save(filepath):
     """Save the vault to a file."""
     vault = Vault(owner="User")
-    vault.save(filepath, key)
+    vault.save(filepath)
     click.echo(f"Vault saved to {filepath}")
 
 # add the command to the CLI group
