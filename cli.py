@@ -1,5 +1,5 @@
-from vault import Vault
 import click
+from vault import Vault
 
 @click.group()
 def cli():
@@ -12,20 +12,22 @@ def cli():
 @click.argument('password')
 def add(site, username, password):
     """Add a new password entry to the vault."""
-    vault = Vault(owner="User")
+    vault = Vault(owner="User") # the owner is redundant at the moment, but could be useful in the future
     vault.add_entry(site, username, password)
+    vault.save("vault.dat")
     click.echo(f"Added entry for {site}")
 
 @click.command()
 def list_entries():
     """List all password entries in the vault."""
     vault = Vault(owner="User")
+    vault.load("vault.dat")
     vault.list_entries()
     
 @click.command()
 @click.argument('filepath')
 @click.argument('key')
-def save(filepath):
+def save(filepath): # this is redundant at the moment, as the save method is called on add now 
     """Save the vault to a file."""
     vault = Vault(owner="User")
     vault.save(filepath)
