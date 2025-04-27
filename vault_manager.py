@@ -8,7 +8,7 @@ class VaultManager:
         self.fernet = Fernet(key)
     
     def save(self, vault: Vault, filepath: str):
-        data = json.dumps([e.__dict__ for e in vault.enteries]).encode()
+        data = json.dumps([e.__dict__ for e in vault.entries]).encode()
         encrypted = self.fernet.encrypt(data)
         with open(filepath, 'wb') as file:
             file.write(encrypted)
@@ -17,9 +17,9 @@ class VaultManager:
         with open(filepath, 'rb') as file:
             encrypted = file.read()
         decrypted = self.fernet.decrypt(encrypted)
-        enteries_data = json.loads(decrypted.decode())
+        entries_data = json.loads(decrypted.decode())
         vault = Vault(owner)
-        for e in enteries_data:
+        for e in entries_data:
             vault.add_entry(Entry(**e))
         return vault
 
