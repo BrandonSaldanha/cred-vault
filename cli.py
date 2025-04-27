@@ -12,10 +12,13 @@ def cli():
 @click.argument('password')
 def add(site, username, password):
     """Add a new password entry to the vault."""
-    vault = Vault(owner="User") # the owner is redundant at the moment, but could be useful in the future
-    vault.add_entry(site, username, password)
-    vault.save("vault.dat")
-    click.echo(f"Added entry for {site}")
+    try:
+        vault = Vault(owner="User") # the owner is redundant at the moment, but could be useful in the future
+        vault.add_entry(site, username, password)
+        vault.save("vault.dat")
+        click.echo(f"Added entry for {site}")
+    except ValueError as e:
+        raise click.ClickException(str(e))
 
 @click.command()
 def list_entries():
