@@ -1,3 +1,4 @@
+import os
 import click
 from vault import Vault
 
@@ -14,6 +15,8 @@ def add(site, username, password):
     """Add a new password entry to the vault."""
     try:
         vault = Vault(owner="User") # the owner is redundant at the moment, but could be useful in the future
+        if os.path.exists("vault.dat"):
+            vault.load("vault.dat")
         vault.add_entry(site, username, password)
         vault.save("vault.dat")
         click.echo(f"Added entry for {site}")
