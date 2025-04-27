@@ -4,7 +4,7 @@ from cryptography.fernet import Fernet
 from entry import Entry
 
 class Vault:
-    def __init__(self, owner: str, key_file="encruption.key"):
+    def __init__(self, owner: str, key_file="encryption.key"):
         self.owner = owner
         self.entries = []
         self.key_file = key_file
@@ -30,8 +30,8 @@ class Vault:
         for entry in self.entries:
             print(f"Site: {entry.site}, Username: {entry.username}, Password: {entry.password}")
 
-    def save(self, filepath: str, encryption_key: str):
-        fernet = Fernet(encryption_key)
+    def save(self, filepath: str):
+        fernet = Fernet(self.encryption_key)
         data = json.dumps([e.__dict__ for e in self.entries]).encode()
         encrypted = fernet.encrypt(data)
         with open(filepath, 'wb') as f:
