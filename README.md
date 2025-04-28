@@ -1,8 +1,9 @@
-# password-manager
-This is a Python CLI password manager
-# Password Manager CLI
+# Password Manager CLI Offline
 
-A command-line password that saves and loads encrypted vaults using Fernet encryption.
+A completely offline command-line password manager that saves and loads encrypted vaults using Fernet encryption.
+
+This version of Password Manager is complete and will live in this branch, main and other branches will become an online password manager, that you can access from multiple devices.
+
 
 ## Features
 - Add and list password entries securely
@@ -11,6 +12,9 @@ A command-line password that saves and loads encrypted vaults using Fernet encry
 - Tested with pytest
 
 ## Setup
+
+## Easiest way
+exe is located in dist folder you can run from CLI :)
 
 ### On Linux/macOS:
 ```bash
