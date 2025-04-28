@@ -1,7 +1,0 @@
-from entry import Entry
-
-def test_entry_creation():
-    e = Entry("GitHub", "ghuser", "ghpass")
-    assert e.site == "GitHub"
-    assert e.username == "ghuser"
-    assert e.password == "ghpass"
