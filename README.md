@@ -14,7 +14,7 @@ This version of Password Manager is complete and will live in this branch, main 
 ## Setup
 
 ## Easiest way
-exe is located in dist folder you can run from CLI :)
+exe is located in release folder you can run from CLI :)
 
 ### On Linux/macOS:
 ```bash
