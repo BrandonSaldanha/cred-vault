@@ -41,12 +41,13 @@ def save(filepath): # this is redundant at the moment, as the save method is cal
 
 @click.command()
 @click.argument("site")
-def delete_entry(site):
+@click.argument("username", required=False)
+def delete(site, username):
     """Delete an entry from the vault."""
     if os.path.exists("vault.dat"):
         vault = Vault(owner="User")
         vault.load("vault.dat")
-        vault.delete_entry(site)
+        vault.delete_entry(site, username)
         vault.save("vault.dat")
         click.echo(f"Deleted entry for {site}")
     else:
@@ -56,7 +57,7 @@ def delete_entry(site):
 cli.add_command(add)
 cli.add_command(list_entries)
 cli.add_command(save)
-cli.add_command(delete_entry)
+cli.add_command(delete)
 
 if __name__ == '__main__':
     cli()
