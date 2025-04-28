@@ -39,10 +39,24 @@ def save(filepath): # this is redundant at the moment, as the save method is cal
     vault.save(filepath)
     click.echo(f"Vault saved to {filepath}")
 
+@click.command()
+@click.argument("site")
+def delete_entry(site):
+    """Delete an entry from the vault."""
+    if os.path.exists("vault.dat"):
+        vault = Vault(owner="User")
+        vault.load("vault.dat")
+        vault.delete_entry(site)
+        vault.save("vault.dat")
+        click.echo(f"Deleted entry for {site}")
+    else:
+        click.echo(f"Vault not found. Please add entries first.")
+
 # add the command to the CLI group
 cli.add_command(add)
 cli.add_command(list_entries)
 cli.add_command(save)
+cli.add_command(delete_entry)
 
 if __name__ == '__main__':
     cli()
