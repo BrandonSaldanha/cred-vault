@@ -53,3 +53,7 @@ class Vault:
         decrypted_data = fernet.decrypt(encrypted)
         entries_data = json.loads(decrypted_data.decode())
         self.entries = [Entry(**entry) for entry in entries_data] # Creates a list of Entry objects from the loaded dictionary data, unpacking each dictionary into the Entry constructor
+
+    def delete_entry(self, site: str):
+        """Delete an entry from the vault by site."""
+        self.entries = [entry for entry in self.entries if entry.site != site]
