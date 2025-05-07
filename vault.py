@@ -2,6 +2,7 @@ import os
 import json
 from cryptography.fernet import Fernet
 from entry import Entry
+import requests
 
 def validate_length(value:str, min_len: int, max_len: int, field_name: str):
     """Validate the length of a string value."""
@@ -9,10 +10,11 @@ def validate_length(value:str, min_len: int, max_len: int, field_name: str):
         raise ValueError(f"{field_name} must be between {min_len} and {max_len} characters long.")
 
 class Vault:
-    def __init__(self, owner: str, key_file="encryption.key"):
+    def __init__(self, owner: str, key_file="encryption.key", api_url=None):
         self.owner = owner
         self.entries = []
         self.key_file = key_file
+        self.api_url = api_url
 
         #load the encryption key from file or generate a new one if it doesn't exist
         self.encryption_key = self.load_or_generate_key()
@@ -33,6 +35,15 @@ class Vault:
         validate_length(password, 1, 100, "Password")
         entry = Entry(site, username, password)
         self.entries.append(entry)
+
+    def encrypt(self, data: str) -> str:
+        fernet = Fernet(self.encryption_key)
+        return fernet.encrypt(data.encode()).decode()
+
+    def decrypt(self, data: str) -> str:
+        fernet = Fernet(self.encryption_key)
+        return fernet.decrypt(data.encode()).decode()
+
 
     def list_entries(self):
         for entry in self.entries:
