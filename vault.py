@@ -2,6 +2,7 @@ import os
 import json
 from cryptography.fernet import Fernet
 from entry import Entry
+import requests
 
 def validate_length(value:str, min_len: int, max_len: int, field_name: str):
     """Validate the length of a string value."""
@@ -9,10 +10,11 @@ def validate_length(value:str, min_len: int, max_len: int, field_name: str):
         raise ValueError(f"{field_name} must be between {min_len} and {max_len} characters long.")
 
 class Vault:
-    def __init__(self, owner: str, key_file="encryption.key"):
+    def __init__(self, owner: str, key_file="encryption.key", api_url=None):
         self.owner = owner
         self.entries = []
         self.key_file = key_file
+        self.api_url = api_url
 
         #load the encryption key from file or generate a new one if it doesn't exist
         self.encryption_key = self.load_or_generate_key()
@@ -33,6 +35,53 @@ class Vault:
         validate_length(password, 1, 100, "Password")
         entry = Entry(site, username, password)
         self.entries.append(entry)
+
+    # Cloud logic, TODO: Remove old code from the offline password manager
+    def encrypt(self, data: str) -> str:
+        fernet = Fernet(self.encryption_key)
+        return fernet.encrypt(data.encode()).decode()
+
+    def decrypt(self, data: str) -> str:
+        fernet = Fernet(self.encryption_key)
+        return fernet.decrypt(data.encode()).decode()
+
+    def upload_entry(self, site: str, username: str, password: str):
+        validate_length(site, 1, 100, "Site")
+        validate_length(username, 1, 50, "Username")
+        validate_length(password, 1, 100, "Password")
+
+        if not self.api_url:
+            raise ValueError("API URL not set for Vault")
+
+        encrypted_password = self.encrypt(password)
+
+        payload = {
+            "user_id": self.owner,
+            "site": site,
+            "username": username,
+            "password": encrypted_password
+        }
+
+        response = requests.post(self.api_url, json=payload)
+        if response.status_code != 200:
+            raise Exception(f"Failed to upload: {response.text}")
+
+    def fetch_entries_from_cloud(self):
+        if not self.api_url:
+            raise ValueError("API URL not set for Vault")
+
+        response = requests.get(self.api_url, params={"user_id": self.owner})
+        if response.status_code != 200:
+            raise Exception(f"Failed to fetch: {response.text}")
+
+        entries_data = response.json()
+        self.entries = [
+            Entry(
+                site=e['site'],
+                username=e['username'],
+                password=self.decrypt(e['password'])
+            ) for e in entries_data
+        ]
 
     def list_entries(self):
         for entry in self.entries:
