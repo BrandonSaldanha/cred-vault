@@ -36,6 +36,7 @@ class Vault:
         entry = Entry(site, username, password)
         self.entries.append(entry)
 
+    # Cloud logic, TODO: Remove old code from the offline password manager
     def encrypt(self, data: str) -> str:
         fernet = Fernet(self.encryption_key)
         return fernet.encrypt(data.encode()).decode()
@@ -44,6 +45,43 @@ class Vault:
         fernet = Fernet(self.encryption_key)
         return fernet.decrypt(data.encode()).decode()
 
+    def upload_entry(self, site: str, username: str, password: str):
+        validate_length(site, 1, 100, "Site")
+        validate_length(username, 1, 50, "Username")
+        validate_length(password, 1, 100, "Password")
+
+        if not self.api_url:
+            raise ValueError("API URL not set for Vault")
+
+        encrypted_password = self.encrypt(password)
+
+        payload = {
+            "user_id": self.owner,
+            "site": site,
+            "username": username,
+            "password": encrypted_password
+        }
+
+        response = requests.post(self.api_url, json=payload)
+        if response.status_code != 200:
+            raise Exception(f"Failed to upload: {response.text}")
+
+    def fetch_entries_from_cloud(self):
+        if not self.api_url:
+            raise ValueError("API URL not set for Vault")
+
+        response = requests.get(self.api_url, params={"user_id": self.owner})
+        if response.status_code != 200:
+            raise Exception(f"Failed to fetch: {response.text}")
+
+        entries_data = response.json()
+        self.entries = [
+            Entry(
+                site=e['site'],
+                username=e['username'],
+                password=self.decrypt(e['password'])
+            ) for e in entries_data
+        ]
 
     def list_entries(self):
         for entry in self.entries:
