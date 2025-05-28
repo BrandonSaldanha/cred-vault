@@ -71,6 +71,7 @@ class Vault:
             raise ValueError("API URL not set for Vault")
 
         response = requests.get(self.api_url, params={"user_id": self.owner})
+        print("Raw response body:", response.text) #debug
         if response.status_code != 200:
             raise Exception(f"Failed to fetch: {response.text}")
 

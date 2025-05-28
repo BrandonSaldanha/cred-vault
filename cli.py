@@ -2,6 +2,8 @@ import os
 import click
 from vault import Vault
 
+API_URL = "https://ecu18zixz9.execute-api.us-east-1.amazonaws.com/dev/passwords"  # ← check my URL
+
 @click.group()
 def cli():
     """Password Manager CLI"""
@@ -11,53 +13,32 @@ def cli():
 @click.argument('site')
 @click.argument('username')
 @click.argument('password')
-def add(site, username, password):
-    """Add a new password entry to the vault."""
+@click.argument('user_id')
+def add(site, username, password, user_id):
+    """Add a new password entry to the cloud vault."""
     try:
-        vault = Vault(owner="User") # the owner is redundant at the moment, but could be useful in the future
-        if os.path.exists("vault.dat"):
-            vault.load("vault.dat")
-        vault.add_entry(site, username, password)
-        vault.save("vault.dat")
-        click.echo(f"Added entry for {site}")
+        vault = Vault(owner=user_id, api_url=API_URL)
+        vault.upload_entry(site, username, password)
+        click.echo(f" Added entry for {site}")
     except ValueError as e:
         raise click.ClickException(str(e))
+    except Exception as e:
+        raise click.ClickException(f"Upload failed: {str(e)}")
 
 @click.command()
-def list_entries():
-    """List all password entries in the vault."""
-    vault = Vault(owner="User")
-    vault.load("vault.dat")
-    vault.list_entries()
+@click.argument('user_id')
+def list_entries(user_id):
+    """List all password entries from the cloud vault."""
+    try:
+        vault = Vault(owner=user_id, api_url=API_URL)
+        vault.fetch_entries_from_cloud()
+        vault.list_entries()
+    except Exception as e:
+        raise click.ClickException(f"Fetch failed: {str(e)}")
     
-@click.command()
-@click.argument('filepath')
-@click.argument('key')
-def save(filepath): # this is redundant at the moment, as the save method is called on add now 
-    """Save the vault to a file."""
-    vault = Vault(owner="User")
-    vault.save(filepath)
-    click.echo(f"Vault saved to {filepath}")
-
-@click.command()
-@click.argument("site")
-@click.argument("username", required=False)
-def delete(site, username):
-    """Delete an entry from the vault."""
-    if os.path.exists("vault.dat"):
-        vault = Vault(owner="User")
-        vault.load("vault.dat")
-        vault.delete_entry(site, username)
-        vault.save("vault.dat")
-        click.echo(f"Deleted entry for {site}")
-    else:
-        click.echo(f"Vault not found. Please add entries first.")
-
 # add the command to the CLI group
 cli.add_command(add)
 cli.add_command(list_entries)
-cli.add_command(save)
-cli.add_command(delete)
 
 if __name__ == '__main__':
     cli()
