@@ -19,7 +19,7 @@ class Vault:
         #load the encryption key from file or generate a new one if it doesn't exist
         self.encryption_key = self.load_or_generate_key()
 
-    def load_or_generate_key(self):
+    def load_or_generate_key(self):  
         if os.path.exists(self.key_file):
             with open(self.key_file, 'rb') as key_file:
                 key = key_file.read()
@@ -29,21 +29,6 @@ class Vault:
                 key_file.write(key)
         return key
 
-    def add_entry(self, site: str, username: str, password: str):
-        validate_length(site, 1, 100, "Site")
-        validate_length(username, 1, 50, "Username")
-        validate_length(password, 1, 100, "Password")
-        entry = Entry(site, username, password)
-        self.entries.append(entry)
-
-    # Cloud logic, TODO: Remove old code from the offline password manager
-    def encrypt(self, data: str) -> str:
-        fernet = Fernet(self.encryption_key)
-        return fernet.encrypt(data.encode()).decode()
-
-    def decrypt(self, data: str) -> str:
-        fernet = Fernet(self.encryption_key)
-        return fernet.decrypt(data.encode()).decode()
 
     def upload_entry(self, site: str, username: str, password: str):
         validate_length(site, 1, 100, "Site")
@@ -87,26 +72,3 @@ class Vault:
     def list_entries(self):
         for entry in self.entries:
             print(f"Site: {entry.site}, Username: {entry.username}, Password: {entry.password}")
-
-    def save(self, filepath: str):
-        fernet = Fernet(self.encryption_key)
-        data = json.dumps([e.__dict__ for e in self.entries]).encode()
-        encrypted = fernet.encrypt(data)
-        with open(filepath, 'wb') as f:
-            f.write(encrypted)
-    
-    def load(self, filepath: str):
-        """Load the vault from a file, decrypting the data with the stored encryption key."""
-        fernet = Fernet(self.encryption_key)
-        with open(filepath, 'rb') as f:
-            encrypted = f.read()
-        decrypted_data = fernet.decrypt(encrypted)
-        entries_data = json.loads(decrypted_data.decode())
-        self.entries = [Entry(**entry) for entry in entries_data] # Creates a list of Entry objects from the loaded dictionary data, unpacking each dictionary into the Entry constructor
-
-    def delete_entry(self, site: str, username: str = None):
-        """Delete an entry from the vault by site."""
-        if username:
-            self.entries = [entry for entry in self.entries if not (entry.site == site and entry.username == username)]
-        else:
-            self.entries = [entry for entry in self.entries if entry.site != site]
